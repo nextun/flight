@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html ng-app="flightApp">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title> Flight Booking System| AngularJS </title>
+
+        <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
+        <link rel="stylesheet" href="css/bootstrap/bootstrap-theme.css">
+        <link rel="stylesheet" href="css/sass/style.css">
+        <link rel="stylesheet" href="css/main.css">
+        
+        <!--BOOTSTRAP UI INITIAL-->
+        <script src="js/lib/lodash/dist/lodash.min.js"></script>
+        <!-- jquery, bootstrap, ng libs -->
+        <script src="js/lib/jquery.js"></script>
+        <script src="js/lib/jquery-ui.js"></script>
+        <script src="js/lib/jquery.ui.touch-punch.js"></script>
+        <script src="js/lib/bootstrap.js"></script>
+        <script src="js/lib/angular.js"></script>
+        <script src="js/lib/angular-route.js"></script>
+        <script src="js/lib/angular-animate.js"></script>
+        <script src="js/lib/angular-touch.min.js"></script>
+        <script src="js/lib/inputmask.js"></script>
+        <script src="js/lib/highcharts-ng.js"></script>
+        <script src="js/lib/highcharts.js"></script>
+        <script src="js/lib/sortable.js"></script>
+
+        <!-- UI BOOTSTRAP -->
+        <script src="js/lib/angular-bootstrap/ui-bootstrap.js"></script>
+        <script src="js/lib/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+        <!-- NG PLUGINS TRANSLATE -->
+        <script src="js/lib/angular-translate/angular-translate.js"></script>
+        <script src="js/lib/angular-translate/angular-translate-storage-local.js"></script>
+        <script src="js/lib/angular-translate/angular-translate-loader-url.js"></script>
+        <!-- NG PLUGINS LOCALE -->
+        <script src="js/lib/angular-dynamic-locale/src/tmhDynamicLocale.js"></script>
+        <!-- PDF MAKE -->
+        <script src="js/lib/pdfmake/pdfmake.js"></script>
+        <script src="js/lib/pdfmake/vfs_fonts.js"></script>
+        <!--BOOTSTRAP'S DROPDOWN-->
+        <script src="js/lib/angularjs-dropdown-multiselect-master/dist/angularjs-dropdown-multiselect.min.js"></script>
+        <!-- DATETIME PICKER -->
+        <script src="js/lib/bootstrap-ui-datetime-picker/dist/datetime-picker.js"></script>
+        <script src="js/lib/bootstrap-ui-datetime-picker/dist/datetime-picker.tpls.js"></script>
+
+        <!-- APP DEPENDENCY JS -->
+        <script src="app/models/models.js"></script>
+        <script src="app/controllers/app.js"></script>
+        <script src="app/controllers/controllers.js"></script>
+        <script src="app/controllers/services/varServices.js"></script>
+        <script src="app/controllers/services/commonServices.js"></script>
+        <script src="app/controllers/directives.js"></script>
+        <script src="app/controllers/filters.js"></script>
+
+    </head>
+    <body>
+        <div id="overlay" style="display:none;"><img id="loading" src="images/ajax-loader.gif"></div>
+
+<div ng-controller="flightController">
+<!-- Navigation -->
+<nav class="navbar navbar-inverse nopaddingmargin">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Flight Booking System</a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a class="link-red" ng-click="logout()">Log Out</a></li>
+                <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">User <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a class="link-red" ng-click="logOut()">Log Out</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container-fluid -->
+</nav>
+
+
+<!-- Content -->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 mixpadding">
+            <!-- Search Left -->
+            <div class="search" ng-show="viewControl.showSearch">
+                <form ng-submit="submitForm()">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <i class="glyphicon glyphicon-search"></i>
+                            <strong>Search Flight</strong>
+                        </div>
+                        <div class="panel-body">
+                            <div class="btn-group">
+                                <label class="btn btn-primary active">
+                                    <input type="radio" ng-model="search.type" value="single"> Single
+                                </label>
+                                <label class="btn btn-primary">
+                                    <input type="radio" ng-model="search.type" value="return"> Return
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label for="from" class="control-label">Flight From</label>
+                                <div>
+                                    <input type="text" class="form-control" id="from" ng-model="search.from" placeholder="Departure Airport">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="to" class="control-label">Flight To</label>
+                                <div>
+                                    <input type="text" class="form-control" id="to" ng-model="search.to" placeholder="Destination Airport">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="depart" class="control-label">Depart Date</label>
+                                <div>
+                                    <div class="btn-group" role="group" aria-label="">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" datetime-picker="dd MMM yyyy" datepicker-options="dateOptions" ng-model="search.depart" is-open="isOpen.depart" enable-time="false" min-date="dateToday" max-date="search.return" disabled/>
+                                            <span class="input-group-btn">
+                                            <button type="button" class="btn btn-default" ng-click="openCalendar($event, 'depart')"><i class="glyphicon glyphicon-calendar"></i></button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group" ng-show="search.type=='return'">
+                                <label for="return" class="control-label">Return Date</label>
+
+                                <div>
+                                    <div class="btn-group" role="group" aria-label="">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" datetime-picker="dd MMM yyyy" datepicker-options="dateOptions" ng-model="search.return" is-open="isOpen.return" enable-time="false" min-date="(search.depart)?search.depart:dateToday" disabled/>
+                                            <span class="input-group-btn">
+                                            <button type="button" class="btn btn-default" ng-click="openCalendar($event, 'return')"><i class="glyphicon glyphicon-calendar"></i></button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="passengers" class="control-label">Passengers</label>
+                                <div>
+                                    <select id="passengers" class="form-control" ng-model="search.passengers" required>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="6">7</option>
+                                        <option value="6">8</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer clearfix">
+                            <div class="pull-right">
+                                <a class="btn btn-success" ng-click="clickSearch()">
+                                    <i class="glyphicon glyphicon-search"></i>
+                                    Search
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- Details Left -->
+            <div class="details" ng-show="!viewControl.showSearch">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <i class="glyphicon glyphicon-plane"></i>
+                        <strong>Flight Details</strong>
+                    </div>
+                    <div class="panel-body">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h3>Out: {{ticket.out.from}} to {{ticket.out.to}}</h3>
+                                <h4>Date: {{ticket.out.depart | date:'dd MMM yyyy' }}</h4>
+                                <h4>Depart: {{ticket.out.depart | date:'HH:mm'}} - Arrive: {{ ticket.out.arrive | date:'HH:mm' }}</h4>
+                                <h4>{{ ticket.out.price | currency:"&euro;" }} X {{ticket.passengers.length}} Passenger</h4>
+                            </li>
+                            <li class="list-group-item" ng-show="ticket.back">
+                                <h3>Back: {{ticket.back.from}} to {{ticket.back.to}}</h3>
+                                <h4>Date: {{ticket.back.depart | date:'dd MMM yyyy' }}</h4>
+                                <h4>Depart: {{ticket.back.depart | date:'HH:mm'}} - Arrive: {{ ticket.back.arrive | date:'HH:mm' }}</h4>
+                                <h4>{{ ticket.back.price | currency:"&euro;" }} X {{ticket.passengers.length}} Passenger</h4>
+                            </li>
+                            <li class="list-group-item" ng-show="ticket.seatprice!==0">
+                                <h4>&euro;5 X {{ticket.seatprice/5}} Seat Selected</h4>
+                            </li>
+                            <li class="list-group-item">
+                                <h3>Total Price: {{ (ticket.totalprice + ticket.seatprice) | currency:"&euro;"}}</h3>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="panel-footer clearfix">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-9 mixpadding">
+            <!-- Page Content - Demo Info -->
+            <div class="panel panel-info" ng-show="viewControl.showInfo">
+                <div class="panel-heading">
+                    <span class="glyphicon glyphicon-info-sign"></span> <strong>Read Me</strong>
+                </div>
+                <div class="panel-body">
+                    <div class="jumbotron">
+                        <h3>Demo Info</h3>
+                        <br>
+                        <h4>2 cities (airports) and multiple flights available<h4>
+                        <ul>
+                            <li>Dublin (DUB)</li>
+                            <li>London (LGW)</li>
+                        </ul>
+                        <br>
+                        <h4>Search Result Date<h4>
+                        <ul>
+                            <li>1 Jan 2016 - 31 Mar 2016</li>
+                        </ul>
+                        <br>
+                        <h4>Please to click the button to initial dummy data<h4>
+                        <button type="button" class="btn btn-primary btn-lg" ng-click="initialData()">Initial Data</button>
+                        <br>
+                        <h4>Run Server and Access to localhost:8080<h4>
+                        node server.js
+                    </div>
+                </div>
+            </div>
+            <!-- Page Content - Flight Result -->
+            <div class="panel panel-info" ng-show="viewControl.showResult">
+                <div class="panel-heading">
+                    <span class="glyphicon glyphicon-list"></span> <strong>List of Flight Result</strong>
+                </div>
+                <div class="panel-body">
+                    <h2>Flight Out - {{ search.depart | date:'dd MMM yyyy' }}</h2>
+                    <div class="alert alert-danger" role="alert" ng-show="(outFlights.length===0)">Sorry, there are no flights available on this day</div>
+                    <div class="list-group" ng-show="(outFlights.length>0)">
+                        <a class="list-group-item" ng-repeat="result in outFlights" ng-class="result.status" ng-click="selectFlight('out', $index, result)">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="pull-left">
+                                        <h3> {{ result.code }}</h3>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div align="center">
+                                        <h3> --- <i class="glyphicon glyphicon-plane"></i> --- </h3>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class=" pull-right">
+                                        <h3>Price: {{ result.price | currency:"&euro;" }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="pull-left">
+                                        <h4>From: {{ result.from }} @ {{ result.depart | date:'HH:mm' }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div align="center">
+                                        {{ result.left }} seat(s) available
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class=" pull-right">
+                                        <h4>To: {{ result.to }} @ {{ result.arrive | date:'HH:mm' }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="panel-body" ng-show="(backFlights !== null)">
+                    <h2>Flight Back - {{ search.return | date:'dd MMM yyyy' }}</h2>
+                    <div class="alert alert-danger" role="alert" ng-show="(backFlights.length===0)">Sorry, there are no flights available on this day</div>
+                    <div class="list-group" ng-show="(backFlights.length>0)">
+                        <a class="list-group-item" ng-repeat="result in backFlights" ng-class="result.status" ng-click="selectFlight('back', $index, result)">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="pull-left">
+                                        <h3> {{ result.code }}</h3>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div align="center">
+                                        <h3> --- <i class="glyphicon glyphicon-plane"></i> --- </h3>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class=" pull-right">
+                                        <h3>Price: {{ result.price | currency:"&euro;" }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="pull-left">
+                                        <h4>From: {{ result.from }} @ {{ result.depart | date:'HH:mm' }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div align="center">
+                                        {{ result.left }} seat(s) available
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class=" pull-right">
+                                        <h4>To: {{ result.to }} @ {{ result.arrive | date:'HH:mm' }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="panel-footer clearfix">
+                    <div class="pull-right" ng-show="viewControl.showContinueButton">
+                        <a class="btn btn-success" ng-click="confirmSearch()">
+                            Continue
+                            <i class="glyphicon glyphicon-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- Page Content - Select Seat -->
+            <div class="panel panel-info" ng-show="viewControl.showSeats">
+                <div class="panel-heading">
+                    <span class="glyphicon glyphicon-user"></span> <strong>Passenger Details</strong>
+                </div>
+                <div class="panel-body mixpadding">
+                    <ul class="list-group">
+                        <li class="list-group-item" ng-repeat="passenger in ticket.passengers">
+                            <div class="row">
+                                <div class="form-group col-sm-6">
+                                    <label for="name" class="control-label">Passenger {{$index+1}}</label>
+                                    <div>
+                                        <input type="text" class="form-control" id="name" ng-model="ticket.passengers[$index].name" placeholder="Name">
+                                    </div>
+                                </div>
+                                <div class="form-group col-sm-6">
+                                    <label for="email" class="control-label"></label>
+                                    <div>
+                                        <input type="text" class="form-control" id="email" ng-model="ticket.passengers[$index].email" placeholder="Email">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-sm-6">
+                                    <label for="flightoutseat" class="col-sm-6 control-label">Flight Out Seat: {{ticket.passengers[$index].outSeat}}</label>
+                                    <div class="col-sm-6">
+                                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#outSeat" ng-click="showSeat($index, 'out')">Select</button>
+                                        <button type="button" class="btn btn-danger" ng-click="removeSeat($index, 'out')" ng-show="(ticket.passengers[$index].outSeat!='')">Remove</button>
+                                    </div>
+                                </div>
+                                <div class="form-group col-sm-6" ng-show="ticket.back">
+                                    <label for="flightoutseat" class="col-sm-6 control-label">Flight Back Seat: {{ticket.passengers[$index].backSeat}}</label>
+                                    <div class="col-sm-6">
+                                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#backSeat" ng-click="showSeat($index, 'back')">Select</button>
+                                        <button type="button" class="btn btn-danger" ng-click="removeSeat($index, 'back')" ng-show="(ticket.passengers[$index].backSeat!='')">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="panel-footer clearfix">
+                    <div class="pull-left">
+                        <a class="btn btn-warning" ng-click="clickSearch()">
+                            <i class="glyphicon glyphicon-chevron-left"></i>
+                            Back to Search
+                        </a>
+                        <a class="btn btn-danger" ng-click="cancelTicket()">
+                            <i class="glyphicon glyphicon-remove"></i>
+                            Cancel
+                        </a>
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-success" ng-click="confirmTicket()">
+                            Confirm
+                            <i class="glyphicon glyphicon-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <!-- Flight Out Modal -->
+                <div class="modal fade" id="outSeat" role="dialog">
+                    <div class="modal-dialog">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title">Select Flight Out Seat</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-sm-2" ng-repeat="seat in ticket.out.seats">
+                                        <button type="button" class="btn" 
+                                            ng-class="{'btn-danger': seat.status, 'btn-success': !seat.status }" 
+                                            ng-disabled="seat.status"
+                                            data-dismiss="modal"
+                                            ng-click="selectSeat(seat.name)">{{seat.name}}</button>
+                                    </div>                    
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Flight Back Modal -->
+                <div class="modal fade" id="backSeat" role="dialog">
+                    <div class="modal-dialog">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title">Select Flight Back Seat</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-sm-2" ng-repeat="seat in ticket.back.seats">
+                                        <button type="button" class="btn" 
+                                            ng-class="{'btn-danger': seat.status, 'btn-success': !seat.status }" 
+                                            ng-disabled="seat.status"
+                                            data-dismiss="modal"
+                                            ng-click="selectSeat(seat.name)">{{seat.name}}</button>
+                                    </div>                    
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- recipt content -->
+            <div class="panel panel-success" ng-show="viewControl.showBooking">
+                <div class="panel-heading">
+                    <span class="glyphicon glyphicon-briefcase"></span> <strong>Booking Confirmation</strong>
+                </div>
+                <div class="panel-body">
+                    <h2>Booking Completely</h2>
+                    <h3>Passenger Details</h3>
+                    <table class="table table-hover">
+                        <tr class="info">
+                            <th>Passager</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Flight out Seat</th>
+                            <th ng-show="ticket.back">Flight back Seat</th>
+                        </tr>
+                        <tr ng-repeat="passager in ticket.passengers">
+                            <td>{{$index+1}}</td>
+                            <td>{{passager.name}}</td>
+                            <td>{{passager.email}}</td>
+                            <td>{{passager.outSeat}}</td>
+                            <td ng-show="ticket.back">{{passager.backSeat}}</td>
+                        </tr>
+                    </table>
+                    <h3 ng-class="{'success-msg': (msgClass===null), 'error-msg': !(msgClass===null) }">{{msg}}</h3>
+                </div>
+                <div class="panel-footer clearfix">
+                    <div class="pull-right">
+                        <a class="btn btn-success" ng-click="cancelTicket()">
+                            <i class="glyphicon glyphicon-thumbs-up"></i>
+                            Book another Ticket
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+    </body>
+</html>
+
+
